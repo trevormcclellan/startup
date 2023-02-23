@@ -41,6 +41,31 @@
         </nav>
     </header>
 
+    <main>
+        <div>
+            <h1>Create a New Event</h1>
+            <form action="index.html">
+                <div class="mb-3">
+                    <label for="name-input" class="form-label">Event Name</label>
+                    <input name="name" class="form-control" id="name-input" required>
+                </div>
+                <div class="mb-3">
+                    <label for="date-input" class="form-label">Event Date</label>
+                    <input type="date" name="date" class="form-control" id="date-input" required>
+                </div>
+                <label for="duration-input">Event Duration</label>
+                <div class="input-group mb-3" id="duration-input">
+                    <input type="number" name="duration" class="form-control" id="duration-input" required>
+                    <select class="form-select" id="time-unit-select">
+                      <option selected value="minutes">Minutes</option>
+                      <option value="hours">Hours</option>
+                    </select>
+                  </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </form>
+        </div>
+    </main>
+
     <footer>
         <div class="container-fluid">
             <span class="text-reset">Trevor McClellan</span>
