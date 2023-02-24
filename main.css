@@ -35,7 +35,7 @@ body {
     padding-bottom: 30px;
   }
 
-  .time {
+  .plan {
     display: flex;
     flex-direction: row;
   }
@@ -72,6 +72,16 @@ body {
 
   .submit {
     float: right;
+  }
+
+  @media (orientation: portrait) {
+    .plan {
+      flex-direction: column;
+    }
+    #users {
+      margin-left: 0px;
+      margin-bottom: 30px;
+    }
   }
 
 
