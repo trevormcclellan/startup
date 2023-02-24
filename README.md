@@ -23,6 +23,11 @@ Simon CSS:
 - Use CSS flex
 - Use Bootstrap
 
+Startup HTML and CSS:
+- Putting together things learned previously
+- Understanding flex better
+- Learning Bootstrap class names
+
 
 # Smart Scheduler
 ## Design
