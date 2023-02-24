@@ -53,3 +53,25 @@ body {
     font-weight: bold;
     margin-right: 10px;
   }
+
+  .event {
+    margin-top: 20px;
+  }
+  
+  .form-page-main {
+    flex-direction: row;
+  }
+
+  .form-page {
+    flex: 0.3 150px;
+  }
+
+  #time-unit-select {
+    flex: 0.3 100px;
+  }
+
+  .submit {
+    float: right;
+  }
+
+
