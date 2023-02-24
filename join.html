@@ -27,10 +27,10 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="index.html">Home</a>
+                            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="create.html">Create</a>
+                            <a class="nav-link" href="create.html">Create</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="join.html">Join</a>
@@ -43,25 +43,13 @@
 
     <main>
         <div>
-            <h1>Create a New Event</h1>
-            <form action="index.html">
+            <h1>Join a Planning Session</h1>
+            <form action="plan.html" class="login-form">
                 <div class="mb-3">
-                    <label for="name-input" class="form-label">Event Name</label>
-                    <input name="name" class="form-control" id="name-input" required>
+                    <label for="code-input" class="form-label">Planning Session Code</label>
+                    <input name="code" class="form-control" id="code-input" required>
                 </div>
-                <div class="mb-3">
-                    <label for="date-input" class="form-label">Event Date</label>
-                    <input type="date" name="date" class="form-control" id="date-input" required>
-                </div>
-                <label for="duration-input">Event Duration</label>
-                <div class="input-group mb-3" id="duration-input">
-                    <input type="number" name="duration" class="form-control" id="duration-input" required>
-                    <select class="form-select" id="time-unit-select">
-                      <option selected value="minutes">Minutes</option>
-                      <option value="hours">Hours</option>
-                    </select>
-                  </div>
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Join</button>
             </form>
         </div>
     </main>
