@@ -28,6 +28,11 @@ Startup HTML and CSS:
 - Understanding flex better
 - Learning Bootstrap class names
 
+Simon JavaScript:
+- Use JS to manipulate the DOM
+- Use LocalStorage
+- Use event listeners
+
 
 # Smart Scheduler
 ## Design
