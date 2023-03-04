@@ -33,6 +33,13 @@ Simon JavaScript:
 - Use LocalStorage
 - Use event listeners
 
+Startup JavaScript:
+- Apply JS principles to a page of my own design
+- Use LocalStorage more
+- Use JSON
+- Adding and modifying elements using the DOM
+- Changing element styles using JS
+
 
 # Smart Scheduler
 ## Design
