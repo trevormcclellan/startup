@@ -36,15 +36,21 @@
                             <a class="nav-link active" href="join.html">Join</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="logout()">Logout</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
 
     <main>
-        <h1>Work Meeting</h1>
-        <h3>Duration: 1 Hour</h3>
-        <h5>Code: FISPXW</h5>
+        <h1 id="event-name">Event Name</h1>
+        <h3 id="event-date">Date: </h3>
+        <h4 id="event-duration">Duration: </h4>
+        <h5 id="event-code">Code: </h5>
         <div class="plan">
             <table class="table table-hover" id="table">
                 <thead>
@@ -68,7 +74,7 @@
                     <tr>
                         <td>10am</td>
                     </tr>
-                    <tr class="table-success table-active">
+                    <tr class="table-success">
                         <td>11am</td>
                     </tr>
                     <tr class="table-success">
@@ -105,15 +111,13 @@
                 <div class="card-header">
                     <h5>Users Online</h5>
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Jimbo</li>
-                    <li class="list-group-item">Anthony</li>
-                    <li class="list-group-item">Annie</li>
+                <ul class="list-group list-group-flush" id="users-online">
                 </ul>
             </div>
         </div>
         <div>
-            <span id="selection-time">Current Selection: 11am</span>
+            <span class="fw-bold">Current Selection: </span>
+            <span id="selection-time" class="text-danger">No time selected</span>
             <button type="button" class="btn btn-success" id="join">Accept Time</button>
         </div>
     </main>
@@ -121,7 +125,10 @@
     <footer>
         <div class="container-fluid">
             <span class="text-reset">Trevor McClellan</span>
-            <a class="text-reset" href="https://github.com/trevormcclellan/simon">Github</a>
+            <a class="text-reset" href="https://github.com/trevormcclellan/startup">Github</a>
         </div>
     </footer>
+    <script src="plan.js"></script>
 </body>
+
+</html>
