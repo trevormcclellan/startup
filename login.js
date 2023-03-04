@@ -1,4 +1,5 @@
 function login() {
+    console.log('login');
     const email = document.getElementById('email-input').value;
     const username = document.getElementById('username-input').value;
     

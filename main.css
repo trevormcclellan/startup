@@ -85,7 +85,7 @@ body {
   .form-invalid:focus {
     border-color: #dc3545 !important;
     box-shadow: 0 0 0 0.25rem rgb(220 53 69 / 25%) !important;
-}
+  }
 
   @media (orientation: portrait) {
     .plan {
