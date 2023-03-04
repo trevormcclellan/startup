@@ -11,3 +11,9 @@ function checkCode(event) {
         document.querySelector(".invalid-feedback").style.display = "block";
     }
 }
+
+function logout() {
+    localStorage.removeItem("email");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
+}

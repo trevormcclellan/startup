@@ -34,5 +34,11 @@ function getEvents() {
     }
 }
 
+function logout() {
+    localStorage.removeItem("email");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
+}
+
 checkAuth();
 getEvents();

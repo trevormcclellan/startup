@@ -25,3 +25,9 @@ function generateId() {
         return id;
     }
 }
+
+function logout() {
+    localStorage.removeItem("email");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
+}
