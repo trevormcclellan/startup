@@ -40,6 +40,12 @@ Startup JavaScript:
 - Adding and modifying elements using the DOM
 - Changing element styles using JS
 
+Simon Service:
+- Use node.js
+- Use express to serve webpage
+- Make request calls in application
+- Use express to respond to API calls
+
 
 # Smart Scheduler
 ## Design
