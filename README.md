@@ -46,6 +46,11 @@ Simon Service:
 - Make request calls in application
 - Use express to respond to API calls
 
+Simon DB:
+- Use MongoDB in a node application
+- Use a database to persist data across sessions
+- Use environment variables to keep sensitive information outside of code
+
 
 # Smart Scheduler
 ## Design
