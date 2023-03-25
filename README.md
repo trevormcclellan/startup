@@ -51,6 +51,10 @@ Simon DB:
 - Use a database to persist data across sessions
 - Use environment variables to keep sensitive information outside of code
 
+Simon Login:
+- Implement login/register functionality using express and MongoDB
+- Show different behavior based on if a user is logged in or not
+- Use cookies for authentication
 
 # Smart Scheduler
 ## Design
