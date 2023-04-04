@@ -64,6 +64,7 @@ async function getEvents() {
 function logout() {
     localStorage.removeItem("email");
     localStorage.removeItem("username");
+    localStorage.removeItem("events");
     fetch(`/api/auth/logout`, {
         method: 'delete',
     }).then(() => (window.location.href = '/'));

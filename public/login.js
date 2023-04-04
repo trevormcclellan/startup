@@ -41,8 +41,8 @@ async function loginOrCreate(endpoint, body) {
     const resp = await response.json();
 
     if (response?.status === 200) {
-        localStorage.setItem('username', body.username);
-        localStorage.setItem('email', body.email);
+        localStorage.setItem('username', resp.username);
+        localStorage.setItem('email', resp.email);
         window.location.href = '/';
     } else {
         const modalEl = document.querySelector('#msgModal');

@@ -39,13 +39,18 @@ async function createUser(email, password, username) {
     return user;
 }
 
-function addEvent(score) {
-    eventCollection.insertOne(score);
+function addEvent(event) {
+    eventCollection.insertOne(event);
 }
 
-function getEvents() {
-    //   const query = { participants: username };
-    const query = {};
+function getEventByCode(code) {
+    const query = { code: code };
+    const event = eventCollection.findOne(query);
+    return event;
+}
+
+function getEvents(username) {
+    const query = { participants: username };
     const cursor = eventCollection.find(query);
     return cursor.toArray();
 }
@@ -55,5 +60,6 @@ module.exports = {
     getUserByToken,
     createUser, 
     addEvent, 
+    getEventByCode,
     getEvents,
 };

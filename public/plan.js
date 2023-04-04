@@ -24,26 +24,28 @@ async function getUser(email) {
     return null;
 }
 
-function loadEventData() {
+async function loadEventData() {
     let params = (new URL(document.location)).searchParams;
     let code = params.get("code");
     
-    let events = JSON.parse(localStorage.getItem("events")) || [];
-    let event = events.find(e => e.code === code);
 
-    if (!event) {
+    let response = await fetch(`/api/event/${code}`)
+    if (response.status === 200) {
+        const event = await response.json();
+        const eventTitle = document.getElementById("event-name");
+        eventTitle.innerText = event.name;
+        const eventDate = document.getElementById("event-date");
+        eventDate.innerText = `Date: ${new Date(event.date).toLocaleDateString()}`;
+        const eventDuration = document.getElementById("event-duration");
+        eventDuration.innerText = `Duration: ${event.duration}`;
+        const eventCode = document.getElementById("event-code");
+        eventCode.innerText = `Code: ${event.code}`;
+
+        return event;
+    }
+    else {
         window.location.href = "join.html";
     }
-    const eventTitle = document.getElementById("event-name");
-    eventTitle.innerText = event.name;
-    const eventDate = document.getElementById("event-date");
-    eventDate.innerText = `Date: ${new Date(event.date).toLocaleDateString()}`;
-    const eventDuration = document.getElementById("event-duration");
-    eventDuration.innerText = `Duration: ${event.duration}`;
-    const eventCode = document.getElementById("event-code");
-    eventCode.innerText = `Code: ${event.code}`;
-
-    return event;
 }
 
 function addUserOnline() {
@@ -69,13 +71,14 @@ function updateCurrentSelection(newSelection, danger) {
 function logout() {
     localStorage.removeItem("email");
     localStorage.removeItem("username");
+    localStorage.removeItem("events");
     fetch(`/api/auth/logout`, {
         method: 'delete',
     }).then(() => (window.location.href = '/'));
 }
 
-function startPlanning() {
-    const planEvent = loadEventData();
+async function startPlanning() {
+    const planEvent = await loadEventData();
     addUserOnline();
     
     let rows = document.querySelector('tbody').rows

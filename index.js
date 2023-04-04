@@ -10,8 +10,6 @@ const authCookieName = 'token';
 // The service port. In production the application is statically hosted by the service on the same port.
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
-let currUser = null;
-
 // JSON body parsing using built-in middleware
 app.use(express.json());
 
@@ -34,10 +32,11 @@ apiRouter.post('/auth/register', async (req, res) => {
 
         // Set the cookie
         setAuthCookie(res, user.token);
-        currUser = user;
 
         res.send({
             id: user._id,
+            email: user.email,
+            username: user.username,
         });
     }
 });
@@ -48,8 +47,7 @@ apiRouter.post('/auth/login', async (req, res) => {
     if (user) {
         if (await bcrypt.compare(req.body.password, user.password)) {
             setAuthCookie(res, user.token);
-            currUser = user;
-            res.send({ id: user._id });
+            res.send({ id: user._id, email: user.email, username: user.username });
             return;
         }
     }
@@ -86,15 +84,29 @@ secureApiRouter.use(async (req, res, next) => {
     }
 });
 
-secureApiRouter.get('/events', async (_req, res) => {
-    const events = await DB.getEvents();
+secureApiRouter.get('/events', async (req, res) => {
+    authToken = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(authToken);
+    const events = await DB.getEvents(user.email);
     res.send(events);
+});
+
+secureApiRouter.get('/event/:id', async (req, res) => {
+    const event = await DB.getEventByCode(req.params.id);
+    if (event) {
+        res.send(event);
+        return;
+    }
+    res.status(404).send({ msg: 'Unknown' });
 });
 
 // Add Event
 secureApiRouter.post('/event', async (req, res) => {
-    await DB.addEvent(req.body);
-    const events = await DB.getEvents();
+    authToken = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(authToken);
+    let event = {...req.body, participants: [user.email]}
+    await DB.addEvent(event);
+    const events = await DB.getEvents(user.email);
     res.send(events);
 });
 
