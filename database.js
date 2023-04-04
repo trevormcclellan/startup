@@ -39,7 +39,17 @@ async function createUser(email, password, username) {
     return user;
 }
 
-function addEvent(event) {
+async function generateCode() {
+    let code = Math.random().toString(36).substr(2, 6).toUpperCase();
+    while (await getEventByCode(code)) {
+        code = Math.random().toString(36).substr(2, 6).toUpperCase();
+    }
+    return code;
+}
+
+async function addEvent(event) {
+    let code = await generateCode();
+    event.code = code;
     eventCollection.insertOne(event);
 }
 
