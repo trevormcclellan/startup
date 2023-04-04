@@ -61,6 +61,11 @@ Simon WebSocket:
 - Broadcast messages
 - Listen for messages
 
+Simon React:
+ - Convert standard HTML and JS to React
+ - Use React components
+ - Use a service with React
+
 # Smart Scheduler
 ## Design
 Have you ever tried to coordinate a meeting or event with several different people who all have different schedules? It is never easy. Smart Scheduler makes it easy to plan events and find a time that works for everyone. One person can create an event and can specify how long it is expected to take. Everyone involved in the meeting can open the application, import their schedule for that day from their Google calendar, and make any adjustments to the schedule. Smart Scheduler will then display the times that everyone is free. Once a time is selected, users will have the choice to add the event to their calendar. <br><br>
