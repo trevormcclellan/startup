@@ -1,3 +1,29 @@
+async function checkAuth() {
+    let authenticated = false;
+    const email = localStorage.getItem('email');
+    if (email) {
+        const user = await getUser(email);
+        authenticated = user?.authenticated;
+    }
+    
+    if (authenticated) {
+        startPlanning();
+    }
+    else {
+        window.location = '/login.html';
+    }
+}
+
+async function getUser(email) {
+    // See if we have a user with the given email.
+    const response = await fetch(`/api/user/${email}`);
+    if (response.status === 200) {
+        return response.json();
+    }
+
+    return null;
+}
+
 function loadEventData() {
     let params = (new URL(document.location)).searchParams;
     let code = params.get("code");
@@ -43,47 +69,53 @@ function updateCurrentSelection(newSelection, danger) {
 function logout() {
     localStorage.removeItem("email");
     localStorage.removeItem("username");
-    window.location.href = "login.html";
+    fetch(`/api/auth/logout`, {
+        method: 'delete',
+    }).then(() => (window.location.href = '/'));
 }
 
-const planEvent = loadEventData();
-addUserOnline();
-
-let rows = document.querySelector('tbody').rows
-for (let i = 0; i < rows.length; i++) {
-    rows[i].onclick = function () {
-        let duration = planEvent.duration.split(" ")
-        let danger = false
-
-        for (let j = 0; j < rows.length; j++) {
-            rows[j].classList.remove('table-active');
-            rows[j].classList.remove('table-danger');
-        }
-
-        if (duration[1] === "hours") {
-            for (let j = 0; j < duration[0]; j++) {
-                rows[i + j].classList.toggle('table-active');
-
-                if (!rows[i + j].classList.contains('table-success')) {
-                    rows[i + j].classList.add('table-danger');
+function startPlanning() {
+    const planEvent = loadEventData();
+    addUserOnline();
+    
+    let rows = document.querySelector('tbody').rows
+    for (let i = 0; i < rows.length; i++) {
+        rows[i].onclick = function () {
+            let duration = planEvent.duration.split(" ")
+            let danger = false
+    
+            for (let j = 0; j < rows.length; j++) {
+                rows[j].classList.remove('table-active');
+                rows[j].classList.remove('table-danger');
+            }
+    
+            if (duration[1] === "hours") {
+                for (let j = 0; j < duration[0]; j++) {
+                    rows[i + j].classList.toggle('table-active');
+    
+                    if (!rows[i + j].classList.contains('table-success')) {
+                        rows[i + j].classList.add('table-danger');
+                        danger = true;
+                    }
+    
+                    if (j === duration[0] - 1) {
+                        updateCurrentSelection(`${rows[i].cells[0].innerText} - ${rows[i + j + 1].cells[0].innerText}`, danger);
+                    }
+                }
+            } 
+    
+            else {
+                rows[i].classList.toggle('table-active');
+    
+                if (!rows[i].classList.contains('table-success')) {
+                    rows[i].classList.add('table-danger');
                     danger = true;
                 }
-
-                if (j === duration[0] - 1) {
-                    updateCurrentSelection(`${rows[i].cells[0].innerText} - ${rows[i + j + 1].cells[0].innerText}`, danger);
-                }
+    
+                updateCurrentSelection(`${rows[i].cells[0].innerText}`, danger);
             }
-        } 
-
-        else {
-            rows[i].classList.toggle('table-active');
-
-            if (!rows[i].classList.contains('table-success')) {
-                rows[i].classList.add('table-danger');
-                danger = true;
-            }
-
-            updateCurrentSelection(`${rows[i].cells[0].innerText}`, danger);
-        }
-    };
+        };
+    }
 }
+
+checkAuth();
