@@ -1,8 +1,7 @@
-function addNewEvent(event) {
+async function addNewEvent(event) {
     event.preventDefault();
     // Generate 6 digit alphanumeric ID
     const id = generateId();
-    console.log(id);
     const newEvent = {
         name: document.getElementById('name-input').value,
         date: document.getElementById('date-input').value,
@@ -10,10 +9,27 @@ function addNewEvent(event) {
         duration: `${document.getElementById('duration-input').value} ${document.getElementById('time-unit-select').value}`,
     };
 
+    try {
+        const response = await fetch('/api/event', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(newEvent),
+        });
+  
+        // Store what the service gave us as the high scores
+        const scores = await response.json();
+        localStorage.setItem('events', JSON.stringify(scores));
+      } catch {
+        // If there was an error then just track scores locally
+        this.updateEventsLocal(newEvent);
+      }
+    window.location.href = 'index.html';
+}
+
+function updateEventsLocal(newEvent) {
     let events = JSON.parse(localStorage.getItem('events')) || [];
     events.push(newEvent);
     localStorage.setItem('events', JSON.stringify(events));
-    window.location.href = 'index.html';
 }
 
 function generateId() {

@@ -1,44 +1,40 @@
-function checkAuth() {
-    if (!localStorage.getItem('email')) {
-        window.location = '/login.html';
-    }
+const express = require('express');
+const app = express();
+
+// The service port. In production the application is statically hosted by the service on the same port.
+const port = process.argv.length > 2 ? process.argv[2] : 4000;
+
+// JSON body parsing using built-in middleware
+app.use(express.json());
+
+// Serve up the application's static content
+app.use(express.static('public'));
+
+// Router for service endpoints
+var apiRouter = express.Router();
+app.use(`/api`, apiRouter);
+
+apiRouter.get('/events', (_req, res) => {
+    res.send(events);
+});
+
+// SubmitScore
+apiRouter.post('/event', (req, res) => {
+    events = updateEvents(req.body, events);
+    res.send(events);
+});
+
+// Return the application's default page if the path is unknown
+app.use((_req, res) => {
+    res.sendFile('index.html', { root: 'public' });
+});
+
+app.listen(port, () => {
+    console.log(`Listening on port ${port}`);
+});
+
+let events = [];
+function updateEvents(newEvent, events) {
+    events.push(newEvent);
+    return events;
 }
-
-function getEvents() {
-    let eventsJson = localStorage.getItem('events') || '[]';
-    let events = JSON.parse(eventsJson);
-
-    if (events.length === 0) {
-        document.getElementById('events-header').innerHTML += `
-            <div class="alert alert-info" role="alert">
-                You don't have any events yet. Create one <a href="create.html">here</a>.
-            </div>
-        `;
-    }
-
-    for (let event of events) {
-        let eventDiv = document.createElement('div');
-        eventDiv.classList.add('card', 'event');
-        eventDiv.innerHTML = `
-            <div class="card-body">
-                <h5 class="card-title">${event.name}</h5>
-                <p class="card-text">Duration: ${event.duration}</p>
-                <a href="plan.html?code=${event.code}" class="btn btn-primary">Join Planning Session</a>
-            </div>
-            <div class="card-footer text-muted">
-                Code: ${event.code}
-            </div>
-        `;
-
-        document.getElementById('events').appendChild(eventDiv);
-    }
-}
-
-function logout() {
-    localStorage.removeItem("email");
-    localStorage.removeItem("username");
-    window.location.href = "login.html";
-}
-
-checkAuth();
-getEvents();
