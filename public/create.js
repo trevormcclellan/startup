@@ -17,10 +17,9 @@ async function addNewEvent(event) {
         });
   
         // Store what the service gave us as the high scores
-        const scores = await response.json();
-        localStorage.setItem('events', JSON.stringify(scores));
+        const events = await response.json();
+        localStorage.setItem('events', JSON.stringify(events));
       } catch {
-        // If there was an error then just track scores locally
         this.updateEventsLocal(newEvent);
       }
     window.location.href = 'index.html';

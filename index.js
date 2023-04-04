@@ -1,5 +1,7 @@
+require(`dotenv`).config()
 const express = require('express');
 const app = express();
+const DB = require('./database');
 
 // The service port. In production the application is statically hosted by the service on the same port.
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -14,13 +16,15 @@ app.use(express.static('public'));
 var apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-apiRouter.get('/events', (_req, res) => {
+apiRouter.get('/events', async (_req, res) => {
+    const events = await DB.getEvents();
     res.send(events);
 });
 
 // SubmitScore
-apiRouter.post('/event', (req, res) => {
-    events = updateEvents(req.body, events);
+apiRouter.post('/event', async (req, res) => {
+    await DB.addEvent(req.body);
+    const events = await DB.getEvents();
     res.send(events);
 });
 
@@ -32,9 +36,3 @@ app.use((_req, res) => {
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
-
-let events = [];
-function updateEvents(newEvent, events) {
-    events.push(newEvent);
-    return events;
-}

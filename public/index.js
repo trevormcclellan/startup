@@ -4,9 +4,16 @@ function checkAuth() {
     }
 }
 
-function getEvents() {
-    let eventsJson = localStorage.getItem('events') || '[]';
-    let events = JSON.parse(eventsJson);
+async function getEvents() {
+    let events = [];
+
+    try {
+        const response = await fetch('/api/events')
+        events = await response.json();
+    } catch {
+        let eventsJson = localStorage.getItem('events') || '[]';
+        events = JSON.parse(eventsJson);
+    }
 
     if (events.length === 0) {
         document.getElementById('events-header').innerHTML += `
