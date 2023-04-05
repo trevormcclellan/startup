@@ -49,8 +49,10 @@ async function getEvents() {
         eventDiv.innerHTML = `
             <div class="card-body">
                 <h5 class="card-title">${event.name}</h5>
-                <p class="card-text">Duration: ${event.duration}</p>
-                <a href="plan.html?code=${event.code}" class="btn btn-primary">Join Planning Session</a>
+                <p class="mb-0">Duration: ${event.duration}</p>
+                <p class="mb-0">Date: ${new Date(event.date).toLocaleDateString()}</p>
+                ${event.acceptedTime ? `<p class="mb-0">Planned Time: ${event.acceptedTime}</p>` : ""}
+                <a href="plan.html?code=${event.code}" class="mt-3 btn btn-primary">Join Planning Session</a>
             </div>
             <div class="card-footer text-muted">
                 Code: ${event.code}

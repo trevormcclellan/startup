@@ -29,6 +29,10 @@ async function loadEventData() {
     let params = (new URL(document.location)).searchParams;
     let code = params.get("code");
 
+    const eventTime = document.getElementById("event-time");
+    eventTime.style.display = "none";
+    const addToCalendar = document.getElementById("add-to-calendar");
+    addToCalendar.style.display = "none";
 
     let response = await fetch(`/api/event/${code}`)
     if (response.status === 200) {
@@ -41,8 +45,13 @@ async function loadEventData() {
         eventDuration.innerText = `Duration: ${event.duration}`;
         const eventCode = document.getElementById("event-code");
         eventCode.innerText = `Code: ${event.code}`;
-
-        configureWebSocket(event.code)
+        if (event.acceptedTime) {
+            const eventTime = document.getElementById("event-time");
+            eventTime.style.display = "block";
+            eventTime.innerText = `Planned Time: ${event.acceptedTime}`;
+            const addToCalendar = document.getElementById("add-to-calendar");
+            addToCalendar.style.display = "inline";
+        }
 
         return event;
     }
@@ -92,6 +101,9 @@ function configureWebSocket(code) {
             busyTimes.push(...msg.value.myBusyTimes)
             updateAvailability()
         }
+        if (msg.type === "accept") {
+            planEvent = await loadEventData()
+        }
     };
 }
 
@@ -122,6 +134,56 @@ function updateCurrentSelection(newSelection, danger) {
     else {
         currentSelection.classList.remove("text-danger");
     }
+}
+
+function acceptTime() {
+    const currentSelection = document.getElementById("selection-time");
+    const currentSelectionText = currentSelection.innerText;
+
+    if (currentSelectionText !== "No time selected") {
+        const startTime = currentSelectionText.split(" ")[0];
+        const endTime = currentSelectionText.split(" ")[2];
+        let startAmPm = startTime.slice(-2);
+        let startHour = startTime.slice(0, -2);
+        if (startAmPm === "pm") {
+            startHour = parseInt(startHour) + 12;
+        }
+        let endAmPm = endTime.slice(-2);
+        let endHour = endTime.slice(0, -2);
+        if (endAmPm === "pm") {
+            endHour = parseInt(endHour) + 12;
+        }
+        const start = new Date(planEvent.date);
+        start.setHours(startHour);
+        const end = new Date(planEvent.date);
+        end.setHours(endHour);
+
+        fetch(`/api/event/${planEvent.code}/accept`, {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                time: currentSelectionText,
+                start: start.toISOString(),
+                end: end.toISOString(),
+            }),
+        }).then(async (resp) => {
+            planEvent = await loadEventData()
+            broadcastEvent("accept", {})
+        });
+    }
+}
+
+function formatTimeForUrl(date) {
+    return date.replace(/\-|\.|\:/g, "");
+}
+
+function addToCalendar() {
+    let start = formatTimeForUrl(planEvent.start)
+    let end = formatTimeForUrl(planEvent.end)
+    let url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${planEvent.name}&dates=${start}/${end}&sf=true&output=xml`
+    window.open(url, '_blank');
 }
 
 function logout() {
@@ -175,12 +237,14 @@ function updateTable(planEvent, rows, i, fromOther = false) {
 
 async function startPlanning() {
     planEvent = await loadEventData();
+    configureWebSocket(planEvent.code)
     let rows = document.querySelector('tbody').rows
     for (let i = 0; i < rows.length; i++) {
         rows[i].onclick = function () {
             updateTable(planEvent, rows, i)
         }
     }
+    updateAvailability();
 }
 
 function updateAvailability() {

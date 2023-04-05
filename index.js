@@ -117,6 +117,17 @@ secureApiRouter.post('/event/:id/join', async (req, res) => {
     res.status(404).send({ msg: 'Unknown' });
 });
 
+secureApiRouter.post('/event/:id/accept', async (req, res) => {
+    const event = await DB.getEventByCode(req.params.id);
+    if (event) {
+        let resp = await DB.acceptTime(req.params.id, req.body.time, req.body.start, req.body.end);
+        res.send(resp);
+    }
+    else {
+        res.status(404).send({ msg: 'Unknown' });
+    }
+});
+
 // Add Event
 secureApiRouter.post('/event', async (req, res) => {
     authToken = req.cookies[authCookieName];
