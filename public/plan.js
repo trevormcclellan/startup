@@ -2,10 +2,10 @@ async function checkAuth() {
     let authenticated = false;
     const email = localStorage.getItem('email');
     if (email) {
-        const user = await getUser(email);
-        authenticated = user?.authenticated;
+        currUser = await getUser(email);
+        authenticated = currUser?.authenticated;
     }
-    
+
     if (authenticated) {
         startPlanning();
     }
@@ -27,7 +27,7 @@ async function getUser(email) {
 async function loadEventData() {
     let params = (new URL(document.location)).searchParams;
     let code = params.get("code");
-    
+
 
     let response = await fetch(`/api/event/${code}`)
     if (response.status === 200) {
@@ -41,6 +41,8 @@ async function loadEventData() {
         const eventCode = document.getElementById("event-code");
         eventCode.innerText = `Code: ${event.code}`;
 
+        configureWebSocket(event.code)
+
         return event;
     }
     else {
@@ -48,11 +50,56 @@ async function loadEventData() {
     }
 }
 
-function addUserOnline() {
-    let user = localStorage.getItem("username");
-    const usersOnline = document.getElementById("users-online");
-    if (user) {
-        usersOnline.innerHTML += `<li class="list-group-item">${user}</li>`;
+function renderUsersOnline() {
+    const usersOnlineList = document.getElementById("users-online");
+    usersOnlineList.innerHTML = "";
+    usersOnline.forEach(user => {
+        usersOnlineList.innerHTML += `<li class="list-group-item">${user.username}</li>`;
+    })
+}
+
+function configureWebSocket(code) {
+    const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
+    socket = new WebSocket(`${protocol}://${window.location.host}/ws/${code}`);
+    socket.onopen = (event) => {
+        addUserOnline(currUser)
+        broadcastEvent("connected", currUser)
+    };
+    socket.onclose = (event) => {
+        console.log("disconnected")
+    };
+    socket.onmessage = async (event) => {
+        const msg = JSON.parse(await event.data.text());
+        if (msg.type === "connected") {
+            addUserOnline(msg.value)
+            broadcastEvent("users", JSON.stringify(usersOnline))
+        }
+        if (msg.type === "disconnected") {
+            usersOnline = usersOnline.filter(user => user.email !== msg.value.email)
+            renderUsersOnline()
+        }
+        if (msg.type === "users") {
+            let onlineUsers = JSON.parse(msg.value)
+            usersOnline = onlineUsers
+            renderUsersOnline()
+        }
+    };
+}
+
+function broadcastEvent(type, value) {
+    const event = {
+        type: type,
+        value: value,
+    };
+    socket.send(JSON.stringify(event));
+}
+
+function addUserOnline(user) {
+    let userExists = usersOnline.find(userToFind => userToFind.email === user.email)
+    let username = user.username
+    if (username && !userExists) {
+        usersOnline.push(user)
+        renderUsersOnline()
     }
 }
 
@@ -62,7 +109,7 @@ function updateCurrentSelection(newSelection, danger) {
 
     if (danger) {
         currentSelection.classList.add("text-danger");
-    } 
+    }
     else {
         currentSelection.classList.remove("text-danger");
     }
@@ -79,46 +126,53 @@ function logout() {
 
 async function startPlanning() {
     const planEvent = await loadEventData();
-    addUserOnline();
-    
+
     let rows = document.querySelector('tbody').rows
     for (let i = 0; i < rows.length; i++) {
         rows[i].onclick = function () {
             let duration = planEvent.duration.split(" ")
             let danger = false
-    
+
             for (let j = 0; j < rows.length; j++) {
                 rows[j].classList.remove('table-active');
                 rows[j].classList.remove('table-danger');
             }
-    
+
             if (duration[1] === "hours") {
                 for (let j = 0; j < duration[0]; j++) {
                     rows[i + j].classList.toggle('table-active');
-    
+
                     if (!rows[i + j].classList.contains('table-success')) {
                         rows[i + j].classList.add('table-danger');
                         danger = true;
                     }
-    
+
                     if (j === duration[0] - 1) {
                         updateCurrentSelection(`${rows[i].cells[0].innerText} - ${rows[i + j + 1].cells[0].innerText}`, danger);
                     }
                 }
-            } 
-    
+            }
+
             else {
                 rows[i].classList.toggle('table-active');
-    
+
                 if (!rows[i].classList.contains('table-success')) {
                     rows[i].classList.add('table-danger');
                     danger = true;
                 }
-    
+
                 updateCurrentSelection(`${rows[i].cells[0].innerText}`, danger);
             }
         };
     }
+}
+
+let currUser = {}
+let usersOnline = []
+let socket;
+window.onbeforeunload = function () {
+    broadcastEvent("disconnected", currUser)
+    socket.close();
 }
 
 checkAuth();

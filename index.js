@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const app = express();
 const DB = require('./database');
+const { PeerProxy } = require('./peerProxy');
 
 const authCookieName = 'token';
 
@@ -65,7 +66,7 @@ apiRouter.get('/user/:email', async (req, res) => {
     const user = await DB.getUser(req.params.email);
     if (user) {
         const token = req?.cookies.token;
-        res.send({ email: user.email, authenticated: token === user.token });
+        res.send({ email: user.email, username: user.username, authenticated: token === user.token });
         return;
     }
     res.status(404).send({ msg: 'Unknown' });
@@ -129,6 +130,8 @@ function setAuthCookie(res, authToken) {
     });
 }
 
-app.listen(port, () => {
+const httpService = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
+
+new PeerProxy(httpService);
