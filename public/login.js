@@ -18,7 +18,9 @@ function register(event) {
     const confirmPassword = document.getElementById('confirm-password-input').value;
 
     if (password !== confirmPassword) {
-        alert('Passwords do not match');
+        const errorBox = document.getElementById('error-box');
+        errorBox.textContent = 'Error: Passwords do not match';
+        errorBox.style.display = 'block';
         return;
     }
 
@@ -45,9 +47,8 @@ async function loginOrCreate(endpoint, body) {
         localStorage.setItem('email', resp.email);
         window.location.href = '/';
     } else {
-        const modalEl = document.querySelector('#msgModal');
-        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${resp.msg}`;
-        const msgModal = new bootstrap.Modal(modalEl, {});
-        msgModal.show();
+        const errorBox = document.getElementById('error-box');
+        errorBox.textContent = `Error: ${resp.msg}`;
+        errorBox.style.display = 'block';
     }
 }
