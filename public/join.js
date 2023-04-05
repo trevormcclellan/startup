@@ -5,7 +5,7 @@ async function checkAuth() {
         const user = await getUser(email);
         authenticated = user?.authenticated;
     }
-    
+
     if (!authenticated) {
         window.location = '/login.html';
     }
@@ -27,7 +27,13 @@ function checkCode(event) {
 
     fetch(`/api/event/${code}`).then(response => {
         if (response.status === 200) {
-            window.location.href = `plan.html?code=${code}`;
+            fetch(`/api/event/${code}/join`, {
+                method: 'post'
+            }).then((response) => {
+                if (response.status === 200 || response.status === 409) {
+                    window.location.href = `plan.html?code=${code}`;
+                }
+            });
         }
         else {
             document.getElementById("code-input").classList.add("form-invalid");

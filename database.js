@@ -53,6 +53,12 @@ async function addEvent(event) {
     eventCollection.insertOne(event);
 }
 
+async function addParticipantToEvent(code, participant) {
+    const query = { code: code };
+    const update = { $push: { participants: participant } };
+    eventCollection.updateOne(query, update);
+}
+
 function getEventByCode(code) {
     const query = { code: code };
     const event = eventCollection.findOne(query);
@@ -70,6 +76,7 @@ module.exports = {
     getUserByToken,
     createUser, 
     addEvent, 
+    addParticipantToEvent,
     getEventByCode,
     getEvents,
 };

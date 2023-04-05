@@ -101,6 +101,22 @@ secureApiRouter.get('/event/:id', async (req, res) => {
     res.status(404).send({ msg: 'Unknown' });
 });
 
+secureApiRouter.post('/event/:id/join', async (req, res) => {
+    authToken = req.cookies[authCookieName];
+    const user = await DB.getUserByToken(authToken);
+    const event = await DB.getEventByCode(req.params.id);
+    if (event) {
+        if (event.participants.includes(user.email)) {
+            res.status(409).send({ msg: 'Already joined' });
+        } else {
+            await DB.addParticipantToEvent(req.params.id, user.email);
+            res.send(event);
+        }
+        return;
+    }
+    res.status(404).send({ msg: 'Unknown' });
+});
+
 // Add Event
 secureApiRouter.post('/event', async (req, res) => {
     authToken = req.cookies[authCookieName];
