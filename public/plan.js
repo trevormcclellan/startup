@@ -83,6 +83,9 @@ function configureWebSocket(code) {
             usersOnline = onlineUsers
             renderUsersOnline()
         }
+        if (msg.type === "click") {
+            updateTable(msg.value.planEvent, document.querySelector('tbody').rows, msg.value.i, true)
+        }
     };
 }
 
@@ -124,46 +127,54 @@ function logout() {
     }).then(() => (window.location.href = '/'));
 }
 
+function updateTable(planEvent, rows, i, fromOther=false) {
+        if (!fromOther) {
+            broadcastEvent("click", { planEvent, i })
+        }
+        let duration = planEvent.duration.split(" ")
+        let danger = false
+
+        for (let j = 0; j < rows.length; j++) {
+            rows[j].classList.remove('table-active');
+            rows[j].classList.remove('table-danger');
+        }
+
+        if (duration[1] === "hours") {
+            for (let j = 0; j < duration[0]; j++) {
+                rows[i + j].classList.toggle('table-active');
+
+                if (!rows[i + j].classList.contains('table-success')) {
+                    rows[i + j].classList.add('table-danger');
+                    danger = true;
+                }
+
+                if (j === duration[0] - 1) {
+                    let newSelection = `${rows[i].cells[0].innerText} - ${rows[i + j + 1].cells[0].innerText}`
+                    updateCurrentSelection(newSelection, danger);
+                }
+            }
+        }
+
+        else {
+            rows[i].classList.toggle('table-active');
+
+            if (!rows[i].classList.contains('table-success')) {
+                rows[i].classList.add('table-danger');
+                danger = true;
+            }
+            let newSelection = `${rows[i].cells[0].innerText}`
+            updateCurrentSelection(newSelection, danger);
+        }
+}
+
 async function startPlanning() {
     const planEvent = await loadEventData();
 
     let rows = document.querySelector('tbody').rows
     for (let i = 0; i < rows.length; i++) {
         rows[i].onclick = function () {
-            let duration = planEvent.duration.split(" ")
-            let danger = false
-
-            for (let j = 0; j < rows.length; j++) {
-                rows[j].classList.remove('table-active');
-                rows[j].classList.remove('table-danger');
-            }
-
-            if (duration[1] === "hours") {
-                for (let j = 0; j < duration[0]; j++) {
-                    rows[i + j].classList.toggle('table-active');
-
-                    if (!rows[i + j].classList.contains('table-success')) {
-                        rows[i + j].classList.add('table-danger');
-                        danger = true;
-                    }
-
-                    if (j === duration[0] - 1) {
-                        updateCurrentSelection(`${rows[i].cells[0].innerText} - ${rows[i + j + 1].cells[0].innerText}`, danger);
-                    }
-                }
-            }
-
-            else {
-                rows[i].classList.toggle('table-active');
-
-                if (!rows[i].classList.contains('table-success')) {
-                    rows[i].classList.add('table-danger');
-                    danger = true;
-                }
-
-                updateCurrentSelection(`${rows[i].cells[0].innerText}`, danger);
-            }
-        };
+            updateTable(planEvent, rows, i)
+        }
     }
 }
 
