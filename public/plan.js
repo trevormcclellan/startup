@@ -280,6 +280,7 @@ async function startPlanning() {
     document.getElementById("current-selection").style.display = "inline";
     document.getElementById("selection-time").style.display = "inline";
     document.getElementById("start-planning").style.display = "none";
+    document.getElementById("tip").style.display = "none";
 
     let rows = document.querySelector('tbody').rows
     let inRange = false
@@ -350,7 +351,7 @@ var startApp = function () {
     gapi.load('auth2', function () {
         // Retrieve the singleton for the GoogleAuth library and set up the client.
         auth2 = gapi.auth2.init({
-            client_id: '540697024878-ubdgjp1bn93n9t3gddqj5698bqkoefld.apps.googleusercontent.com',
+            client_id: '540697024878-ofcqcs20cgq4js8pl39kcjhgru39o00m.apps.googleusercontent.com',
             cookiepolicy: 'single_host_origin',
             // Request scopes in addition to 'profile' and 'email'
             scope: 'https://www.googleapis.com/auth/calendar.readonly'
