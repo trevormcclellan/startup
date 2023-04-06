@@ -59,9 +59,9 @@ async function addParticipantToEvent(code, participant) {
     eventCollection.updateOne(query, update);
 }
 
-async function acceptTime(code, time, start, end) {
+async function acceptTime(code, time, start, end, busyTimes) {
     const query = { code: code };
-    const update = { $set: { acceptedTime: time, start: start, end: end } };
+    const update = { $set: { acceptedTime: time, start: start, end: end, busyTimes: busyTimes } };
     const event = eventCollection.updateOne(query, update);
     return event;
 }

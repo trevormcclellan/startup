@@ -43,6 +43,16 @@ async function getEvents() {
         `;
     }
 
+    events.sort((a, b) => {
+        if (a.acceptedTime && !b.acceptedTime) {
+            return 1;
+        }
+        if (!a.acceptedTime && b.acceptedTime) {
+            return -1;
+        }
+        return new Date(a.date) - new Date(b.date);
+    })
+
     for (let event of events) {
         let eventDiv = document.createElement('div');
         eventDiv.classList.add('card', 'event');
@@ -52,7 +62,7 @@ async function getEvents() {
                 <p class="mb-0">Duration: ${event.duration}</p>
                 <p class="mb-0">Date: ${new Date(event.date).toLocaleDateString()}</p>
                 ${event.acceptedTime ? `<p class="mb-0">Planned Time: ${event.acceptedTime}</p>` : ""}
-                <a href="plan.html?code=${event.code}" class="mt-3 btn btn-primary">Join Planning Session</a>
+                <a href="plan.html?code=${event.code}" class="mt-3 btn btn-primary">${event.acceptedTime ? "View Planned Event" : "Join Planning Session"}</a>
             </div>
             <div class="card-footer text-muted">
                 Code: ${event.code}

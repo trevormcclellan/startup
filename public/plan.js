@@ -7,7 +7,7 @@ async function checkAuth() {
     }
 
     if (authenticated) {
-        startPlanning();
+        adjustSchedule();
         startApp();
     }
     else {
@@ -74,6 +74,7 @@ function configureWebSocket(code) {
     socket.onopen = (event) => {
         addUserOnline(currUser)
         broadcastEvent("connected", currUser)
+        broadcastEvent("availability", { myBusyTimes: busyTimes })
     };
     socket.onclose = (event) => {
         console.log("disconnected")
@@ -98,8 +99,10 @@ function configureWebSocket(code) {
             updateTable(msg.value.planEvent, document.querySelector('tbody').rows, msg.value.i, true)
         }
         if (msg.type === "availability") {
-            busyTimes.push(...msg.value.myBusyTimes)
-            updateAvailability()
+            if (!planEvent.acceptedTime) {
+                busyTimes.push(...msg.value.myBusyTimes)
+                updateAvailability()
+            }
         }
         if (msg.type === "accept") {
             planEvent = await loadEventData()
@@ -143,20 +146,8 @@ function acceptTime() {
     if (currentSelectionText !== "No time selected") {
         const startTime = currentSelectionText.split(" ")[0];
         const endTime = currentSelectionText.split(" ")[2];
-        let startAmPm = startTime.slice(-2);
-        let startHour = startTime.slice(0, -2);
-        if (startAmPm === "pm") {
-            startHour = parseInt(startHour) + 12;
-        }
-        let endAmPm = endTime.slice(-2);
-        let endHour = endTime.slice(0, -2);
-        if (endAmPm === "pm") {
-            endHour = parseInt(endHour) + 12;
-        }
-        const start = new Date(planEvent.date);
-        start.setHours(startHour);
-        const end = new Date(planEvent.date);
-        end.setHours(endHour);
+        const start = convertCellToTime(startTime);
+        const end = convertCellToTime(endTime);
 
         fetch(`/api/event/${planEvent.code}/accept`, {
             method: 'post',
@@ -167,6 +158,7 @@ function acceptTime() {
                 time: currentSelectionText,
                 start: start.toISOString(),
                 end: end.toISOString(),
+                busyTimes: busyTimes,
             }),
         }).then(async (resp) => {
             planEvent = await loadEventData()
@@ -235,16 +227,95 @@ function updateTable(planEvent, rows, i, fromOther = false) {
     }
 }
 
-async function startPlanning() {
+async function adjustSchedule() {
+    document.getElementById("join").style.display = "none";
+    document.getElementById("current-selection").style.display = "none";
+    document.getElementById("selection-time").style.display = "none";
+
     planEvent = await loadEventData();
-    configureWebSocket(planEvent.code)
+    if (planEvent.acceptedTime) {
+        startPlanning();
+    }
+    else {
+        let rows = document.querySelector('tbody').rows
+        let mouseDown = false
+        for (let i = 0; i < rows.length; i++) {
+            rows[i].onmousedown = function () {
+                mouseDown = true
+                initialSchedule.push(i)
+                rows[i].classList.toggle('table-success');
+            }
+            rows[i].onmouseup = function () {
+                mouseDown = false
+            }
+            rows[i].onmouseover = function () {
+                if (mouseDown) {
+                    initialSchedule.push(i)
+                    rows[i].classList.toggle('table-success');
+                }
+            }
+        }
+    }
+}
+
+function convertCellToTime(time, last = false) {
+    let amPm = time.slice(-2);
+    let hour = time.slice(0, -2);
+    let dateObj = new Date(planEvent.date)
+    if (amPm === "pm") {
+        hour = parseInt(hour)
+        if (hour !== 12) {
+            hour += 12
+        }
+    }
+    if (last) {
+        hour = parseInt(hour) + 1
+    }
+    dateObj.setHours(hour)
+    return dateObj
+}
+
+async function startPlanning() {
+    document.getElementById("join").style.display = "inline";
+    document.getElementById("current-selection").style.display = "inline";
+    document.getElementById("selection-time").style.display = "inline";
+    document.getElementById("start-planning").style.display = "none";
+
     let rows = document.querySelector('tbody').rows
+    let inRange = false
+    let startTime
+    let endTime
+    busyTimes = []
     for (let i = 0; i < rows.length; i++) {
         rows[i].onclick = function () {
             updateTable(planEvent, rows, i)
         }
+        rows[i].onmousedown = null;
+        rows[i].onmouseup = null;
+        rows[i].onmouseover = null;
+
+        if (!rows[i].classList.contains('table-success') && !inRange) {
+            inRange = true
+            startTime = convertCellToTime(rows[i].cells[0].innerText)
+        }
+        if (rows[i].classList.contains('table-success') && inRange) {
+            inRange = false
+            endTime = convertCellToTime(rows[i].cells[0].innerText)
+            busyTimes.push({ start: startTime.toISOString(), end: endTime.toISOString() })
+        }
+    }
+    if (inRange) {
+        endTime = convertCellToTime(rows[rows.length - 1].cells[0].innerText, true)
+        busyTimes.push({ start: startTime.toISOString(), end: endTime.toISOString() })
+    }
+    configureWebSocket(planEvent.code)
+    if (planEvent.acceptedTime) {
+        busyTimes = planEvent.busyTimes
     }
     updateAvailability();
+    if (planEvent.acceptedTime) {
+        updateCurrentSelection(planEvent.acceptedTime, false)
+    }
 }
 
 function updateAvailability() {
@@ -317,7 +388,9 @@ function attachSignin(element) {
                 .then(data => {
                     let myBusyTimes = data.calendars.primary.busy
                     busyTimes.push(...myBusyTimes)
-                    broadcastEvent("availability", { myBusyTimes })
+                    if (socket) {
+                        broadcastEvent("availability", { myBusyTimes })
+                    }
                     updateAvailability()
                 })
             googleUser.getBasicProfile().getName();
@@ -326,14 +399,17 @@ function attachSignin(element) {
         });
 }
 
+let initialSchedule = []
 let busyTimes = []
 let planEvent = {}
 let currUser = {}
 let usersOnline = []
 let socket;
 window.onbeforeunload = function () {
-    broadcastEvent("disconnected", currUser)
-    socket.close();
+    if (socket) {
+        broadcastEvent("disconnected", currUser)
+        socket.close();
+    }
 }
 
 checkAuth();

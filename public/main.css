@@ -91,6 +91,12 @@ body {
     max-width: 145px;
   }
 
+  td {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+  }
+
   @media (orientation: portrait) {
     .plan {
       flex-direction: column;

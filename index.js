@@ -120,7 +120,7 @@ secureApiRouter.post('/event/:id/join', async (req, res) => {
 secureApiRouter.post('/event/:id/accept', async (req, res) => {
     const event = await DB.getEventByCode(req.params.id);
     if (event) {
-        let resp = await DB.acceptTime(req.params.id, req.body.time, req.body.start, req.body.end);
+        let resp = await DB.acceptTime(req.params.id, req.body.time, req.body.start, req.body.end, req.body.busyTimes);
         res.send(resp);
     }
     else {

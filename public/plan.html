@@ -119,8 +119,9 @@
         </div>
         <div>
             <span id="event-time" class="fw-bold"></span>
-            <span class="fw-bold">Current Selection: </span>
+            <span class="fw-bold" id="current-selection">Current Selection: </span>
             <span id="selection-time" class="text-danger">No time selected</span><br>
+            <button onclick="startPlanning()" type="button" class="btn btn-success" id="start-planning">Enter Planning Session</button>
             <button onclick="acceptTime()" type="button" class="btn btn-success" id="join">Accept Time</button>
             <button onclick="addToCalendar()" type="button" class="btn btn-success" id="add-to-calendar">Add to Calendar</button>
         </div>
